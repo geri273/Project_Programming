@@ -37,22 +37,22 @@ class House:
         """
         Generate a quality score based on house attributes.
 
-        - 5: New construction and large area
-        - 4: Large area and modern build
-        - 3: Balanced area and older build
-        - 2: Smaller area or older build
-        - 1: Very small area or very old build
+        - Excellent: New construction and large area
+        - Good: Large area and modern build
+        - Average: Balanced area and older build
+        - Fair: Smaller area or older build
+        - Poor: Very small area or very old build
         """
         if self.is_new_construction() and self.area >= 200:
-            self.quality_score = QualityScore.5
+            self.quality_score = QualityScore.Excellent
         elif self.area >= 200 and self.year_built >= 150:
-            self.quality_score = QualityScore.4
+            self.quality_score = QualityScore.Good
         elif self.area >= 150 and self.year_built >= 100:
-            self.quality_score = QualityScore.3
+            self.quality_score = QualityScore.Average
         elif self.area < 150 or self.year_built < 80:
-            self.quality_score = QualityScore.2
+            self.quality_score = QualityScore.Fair
         else:
-            self.quality_score = QualityScore.1
+            self.quality_score = QualityScore.Poor
 
     def sell_house(self) -> None:
         """
