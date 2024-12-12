@@ -1,182 +1,191 @@
 import statistics
 from typing import List, Dict, Any
 
-def none_ratio(data: List[Dict[str, Any]]) -> Dict[str, float]:
-    """
-    Calculate the ratio of None (missing) values for each column in the dataset.
-    
-    Args:
-        data: List of dictionaries representing rows in the dataset.
-    
-    Returns:
-        A dictionary where keys are column names and values are the missing data ratio.
-    """
-    if not data:
-        return {}
-    
-    column_counts = {key: 0 for key in data[0].keys()}
-    none_counts = {key: 0 for key in data[0].keys()}
-    
-    for row in data:
-        for key, value in row.items():
-            column_counts[key] += 1
-            if value is None:
-                none_counts[key] += 1
-    
-    # Calculate the ratio of None values for each column
-    ratio = {key: none_counts[key] / column_counts[key] for key in column_counts}
-    return ratio
+from dataclasses import dataclass
+from typing import Dict, List, Union, Any, Tuple
+import statistics
 
-def average(data: List[Dict[str, Any]], column: str) -> float:
-    """
-    Calculate the average value for a numeric column in the dataset.
-    
-    Args:
-        data: List of dictionaries representing rows in the dataset.
-        column: The column name for which to calculate the average.
-    
-    Returns:
-        The average value of the column, or None if the column is empty or non-numeric.
-    """
-    values = [float(row[column]) for row in data if row[column] is not None and isinstance(row[column], (int, float))]
-    return statistics.mean(values) if values else None
+@dataclass
+class Descriptor:
+    """Class for summarizing real estate data."""
+    data: List[Dict[str, Any]]
 
-def median(data: List[Dict[str, Any]], column: str) -> float:
-    """
-    Calculate the median value for a numeric column in the dataset.
-    
-    Args:
-        data: List of dictionaries representing rows in the dataset.
-        column: The column name for which to calculate the median.
-    
-    Returns:
-        The median value of the column, or None if the column is empty or non-numeric.
-    """
-    values = [float(row[column]) for row in data if row[column] is not None and isinstance(row[column], (int, float))]
-    return statistics.median(values) if values else None
+    def none_ratio(self, columns: Union[List[str], str] = "all") -> Dict[str, float]:
+        """
+        Compute the ratio of None values per column.
+        """
+        if not self.data:
+            raise ValueError("The dataset is empty!")
+        
+        columns_to_check = self._get_columns_to_check(columns)
+        ratios = {}
+        total_rows = len(self.data)
 
-def percentile(data: List[Dict[str, Any]], column: str, p: float = 90) -> float:
-    """
-    Calculate the nth percentile for a numeric column in the dataset.
-    
-    Args:
-        data: List of dictionaries representing rows in the dataset.
-        column: The column name for which to calculate the percentile.
-        p: The desired percentile (default is 90th percentile).
-    
-    Returns:
-        The nth percentile value of the column, or None if the column is empty or non-numeric.
-    """
-    values = [float(row[column]) for row in data if row[column] is not None and isinstance(row[column], (int, float))]
-    return statistics.quantiles(values, n=100)[int(p)] if values else None
+        for col in columns_to_check:
+            none_count = sum(1 for row in self.data if row.get(col) is None)
+            ratios[col] = none_count / total_rows
+        return ratios
 
-def type_mode(data: List[Dict[str, Any]], column: str) -> Any:
-    """
-    Calculate the mode (most frequent value) for a categorical column.
-    
-    Args:
-        data: List of dictionaries representing rows in the dataset.
-        column: The column name for which to calculate the mode.
-    
-    Returns:
-        The mode value of the column, or None if the column is empty.
-    """
-    values = [row[column] for row in data if row[column] is not None]
-    return statistics.mode(values) if values else None
+    def average(self, columns: Union[List[str], str] = "all") -> Dict[str, float]:
+        """
+        Compute the average value for numeric columns, ignoring None values.
+        """
+        columns_to_check = self._get_columns_to_check(columns, numeric_only=True)
+        averages = {}
+
+        for col in columns_to_check:
+            values = [float(row[col]) for row in self.data if row.get(col) is not None]
+            if values:
+                averages[col] = sum(values) / len(values)
+        return averages
+
+    def median(self, columns: Union[List[str], str] = "all") -> Dict[str, float]:
+        """
+        Compute the median value for numeric columns, ignoring None values.
+        """
+        columns_to_check = self._get_columns_to_check(columns, numeric_only=True)
+        medians = {}
+
+        for col in columns_to_check:
+            values = [float(row[col]) for row in self.data if row.get(col) is not None]
+            if values:
+                medians[col] = statistics.median(values)
+        return medians
+
+    def percentile(self, columns: Union[List[str], str] = "all", percentile: int = 50) -> Dict[str, float]:
+        """
+        Compute the specified percentile for numeric columns, ignoring None values.
+        """
+        columns_to_check = self._get_columns_to_check(columns, numeric_only=True)
+        percentiles = {}
+
+        for col in columns_to_check:
+            values = [float(row[col]) for row in self.data if row.get(col) is not None]
+            if values:
+                values.sort()
+                index = int(len(values) * (percentile / 100))
+                percentiles[col] = values[min(index, len(values) - 1)]
+        return percentiles
+
+    def type_and_mode(self, columns: Union[List[str], str] = "all") -> Dict[str, Tuple[str, Union[str, float]]]:
+        """
+        Determine the type and mode of the columns.
+        """
+        columns_to_check = self._get_columns_to_check(columns)
+        types_and_modes = {}
+
+        for col in columns_to_check:
+            non_none_values = [row[col] for row in self.data if row.get(col) is not None]
+            if non_none_values:
+                # Infer type and calculate mode
+                value_type = type(non_none_values[0]).__name__
+                mode_value = statistics.mode(non_none_values)
+                types_and_modes[col] = (value_type, mode_value)
+            else:
+                types_and_modes[col] = ("None", None)
+        return types_and_modes
 
 import numpy as np
-from typing import List, Dict, Any
+from dataclasses import dataclass
+from typing import Dict, List, Union, Any, Tuple
 
-def none_ratio(data: List[Dict[str, Any]]) -> Dict[str, float]:
-    """
-    Calculate the ratio of None (missing) values for each column in the dataset using NumPy.
-    
-    Args:
-        data: List of dictionaries representing rows in the dataset.
-    
-    Returns:
-        A dictionary where keys are column names and values are the missing data ratio.
-    """
-    if not data:
-        return {}
+@dataclass
+class DescriptorNumpy:
+    """Class for summarizing real estate data using NumPy."""
+    data: List[Dict[str, Any]]
 
-    # Convert data to numpy array for numerical operations
-    columns = data[0].keys()
-    column_data = {col: [] for col in columns}
-    
-    for row in data:
+    def __post_init__(self):
+        """
+        Convert the list of dictionaries into a NumPy-friendly format upon initialization.
+        """
+        if not self.data:
+            raise ValueError("The dataset is empty!")
+
+        # Extract all keys (columns) and prepare a structured NumPy array
+        self.columns = list(self.data[0].keys())
+        self.array = np.array([
+            [row.get(col, None) for col in self.columns]
+            for row in self.data
+        ], dtype=object)
+
+    def none_ratio(self, columns: Union[List[str], str] = "all") -> Dict[str, float]:
+        """
+        Compute the ratio of None values per column.
+        """
+        columns_to_check = self._get_columns_to_check(columns)
+        ratios = {}
+
+        for col in columns_to_check:
+            col_idx = self.columns.index(col)
+            none_count = np.sum(self.array[:, col_idx] == None)  # Count None values
+            ratios[col] = none_count / len(self.array)
+        return ratios
+
+    def average(self, columns: Union[List[str], str] = "all") -> Dict[str, float]:
+        """
+        Compute the average for numeric columns, ignoring None values.
+        """
+        columns_to_check = self._get_columns_to_check(columns, numeric_only=True)
+        averages = {}
+
+        for col in columns_to_check:
+            col_idx = self.columns.index(col)
+            numeric_values = self._get_numeric_column(col_idx)
+            if numeric_values.size > 0:
+                averages[col] = np.mean(numeric_values)
+        return averages
+
+    def median(self, columns: Union[List[str], str] = "all") -> Dict[str, float]:
+        """
+        Compute the median for numeric columns, ignoring None values.
+        """
+        columns_to_check = self._get_columns_to_check(columns, numeric_only=True)
+        medians = {}
+
+        for col in columns_to_check:
+            col_idx = self.columns.index(col)
+            numeric_values = self._get_numeric_column(col_idx)
+            if numeric_values.size > 0:
+                medians[col] = np.median(numeric_values)
+        return medians
+
+    def _get_columns_to_check(self, columns: Union[List[str], str], numeric_only: bool = False) -> List[str]:
+        """
+        Helper function to determine which columns to process.
+        """
+        if columns == "all":
+            if numeric_only:
+                return [col for col in self.columns if self._is_numeric_column(col)]
+            return self.columns
+
+        # Validate provided columns
         for col in columns:
-            column_data[col].append(row[col])
+            if col not in self.columns:
+                raise ValueError(f"Column '{col}' not found in data.")
+        
+        if numeric_only:
+            return [col for col in columns if self._is_numeric_column(col)]
+        return columns
 
-    # Convert each column to a numpy array and calculate the ratio of None values
-    none_ratios = {}
-    for col, values in column_data.items():
-        arr = np.array(values, dtype=object)  # dtype=object to handle None values
-        none_ratios[col] = np.sum(arr == None) / len(arr)  # Ratio of None values
-    
-    return none_ratios
+    def _is_numeric_column(self, column: str) -> bool:
+        """Check if a column contains numeric data."""
+        col_idx = self.columns.index(column)
+        column_values = self.array[:, col_idx]
+        return all(self._is_numeric(value) for value in column_values if value is not None)
 
-def average(data: List[Dict[str, Any]], column: str) -> float:
-    """
-    Calculate the average value for a numeric column in the dataset using NumPy.
-    
-    Args:
-        data: List of dictionaries representing rows in the dataset.
-        column: The column name for which to calculate the average.
-    
-    Returns:
-        The average value of the column, or None if the column is empty or non-numeric.
-    """
-    values = [row[column] for row in data if row[column] is not None and isinstance(row[column], (int, float))]
-    if not values:
-        return None
-    return np.mean(values)
+    def _get_numeric_column(self, col_idx: int) -> np.ndarray:
+        """
+        Get numeric values from a specific column, ignoring None values.
+        """
+        column_values = self.array[:, col_idx]
+        numeric_values = [float(value) for value in column_values if self._is_numeric(value)]
+        return np.array(numeric_values)
 
-def median(data: List[Dict[str, Any]], column: str) -> float:
-    """
-    Calculate the median value for a numeric column in the dataset using NumPy.
-    
-    Args:
-        data: List of dictionaries representing rows in the dataset.
-        column: The column name for which to calculate the median.
-    
-    Returns:
-        The median value of the column, or None if the column is empty or non-numeric.
-    """
-    values = [row[column] for row in data if row[column] is not None and isinstance(row[column], (int, float))]
-    if not values:
-        return None
-    return np.median(values)
+    def _is_numeric(self, value: Any) -> bool:
+        """Check if a value is numeric."""
+        try:
+            float(value)
+            return True
+        except (ValueError, TypeError):
+            return False
 
-def percentile(data: List[Dict[str, Any]], column: str, p: float = 90) -> float:
-    """
-    Calculate the nth percentile for a numeric column in the dataset using NumPy.
-    
-    Args:
-        data: List of dictionaries representing rows in the dataset.
-        column: The column name for which to calculate the percentile.
-        p: The desired percentile (default is 90th percentile).
-    
-    Returns:
-        The nth percentile value of the column, or None if the column is empty or non-numeric.
-    """
-    values = [row[column] for row in data if row[column] is not None and isinstance(row[column], (int, float))]
-    if not values:
-        return None
-    return np.percentile(values, p)
-
-def type_mode(data: List[Dict[str, Any]], column: str) -> Any:
-    """
-    Calculate the mode (most frequent value) for a categorical column using NumPy.
-    
-    Args:
-        data: List of dictionaries representing rows in the dataset.
-        column: The column name for which to calculate the mode.
-    
-    Returns:
-        The mode value of the column, or None if the column is empty.
-    """
-    values = [row[column] for row in data if row[column] is not None]
-    if not values:
-        return None
-    return np.argmax(np.bincount(values))
