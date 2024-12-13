@@ -33,12 +33,12 @@ class Consumer:
         Attempt to purchase a suitable house based on preferences.
         """
         if self.house:
-            return  # Consumer already owns a house
+            return  
 
         affordable_houses = housing_market.get_houses_that_meet_requirements(max_price=self.savings, segment=self.segment.name)
         if not affordable_houses:
             return
 
-        house_to_buy = affordable_houses[0]  # Simplified selection
+        house_to_buy = affordable_houses[0]  
         house_to_buy.sell_house()
         self.house = house_to_buy
