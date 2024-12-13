@@ -17,7 +17,7 @@ class HousePricePredictor:
         """
         self.train_data = pl.read_csv(train_data_path)
         self.test_data = pl.read_csv(test_data_path)
-        self.model: Pipeline = None  # To store the trained pipeline
+        self.model: Pipeline = None  
         self.preprocessor = None
         self.target = None
         self.features = None
@@ -36,12 +36,10 @@ class HousePricePredictor:
         self.target = target_column
         self.features = [col for col in self.train_data.columns if col != target_column]
         
-        # Separate numeric and categorical features
-        sample_df = self.train_data.to_pandas()  # Convert Polars DataFrame to Pandas
+        sample_df = self.train_data.to_pandas()  
         self.numeric_features = sample_df.select_dtypes(include=['float64', 'int64']).columns.tolist()
         self.categorical_features = [col for col in self.features if col not in self.numeric_features]
         
-        # Define preprocessors
         numeric_transformer = Pipeline(steps=[
             ('imputer', SimpleImputer(strategy='mean')),
             ('scaler', StandardScaler())
@@ -63,15 +61,12 @@ class HousePricePredictor:
         """
         Train Linear Regression and Random Forest models.
         """
-        # Convert to Pandas DataFrame for scikit-learn compatibility
         full_train_data = self.train_data.to_pandas()
         X = full_train_data.drop(columns=[self.target])
         y = full_train_data[self.target]
         
-        # Split data
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
         
-        # Initialize models
         models = {
             "Linear Regression": LinearRegression(),
             "Random Forest": RandomForestRegressor(n_estimators=100, random_state=42)
@@ -85,20 +80,17 @@ class HousePricePredictor:
                 ('model', model)
             ])
             
-            # Train model
             pipeline.fit(X_train, y_train)
             y_pred = pipeline.predict(X_test)
             
-            # Evaluate
             results[name] = {
                 "MSE": mean_squared_error(y_test, y_pred),
                 "MAE": mean_absolute_error(y_test, y_pred),
                 "R2": r2_score(y_test, y_pred),
                 "MAPE": mean_absolute_percentage_error(y_test, y_pred),
-                "model": pipeline  # Save trained pipeline
+                "model": pipeline  
             }
         
-        # Save the best model (Random Forest)
         self.model = results["Random Forest"]["model"]
         return results
 
@@ -109,13 +101,10 @@ class HousePricePredictor:
         if not self.model:
             raise ValueError("Model has not been trained. Please call train_models() first.")
 
-        # Convert test data to Pandas DataFrame
         X_test = self.test_data.to_pandas()
         
-        # Predict using the trained pipeline
         predictions = self.model.predict(X_test)
         
-        # Prepare submission
         submission = pl.DataFrame({
             "Id": self.test_data["Id"].to_list(),
             "SalePrice": predictions
