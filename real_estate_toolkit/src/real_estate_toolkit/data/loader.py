@@ -3,8 +3,7 @@ from pathlib import Path
 from typing import Dict, List, Union
 import csv
 
-
-#Now we want to read csv files using classes: 
+ 
 class DataLoader: 
 
     data_path: Path
