@@ -71,28 +71,29 @@ class Simulation:
         Calculate savings for all consumers.
         """
         for consumer in self.consumers:
-            consumer.compute_savings(self.years)
+            Consumer.compute_savings(self.years)
+
 
     def clean_the_market(self) -> None:
         """
         Execute market transactions.
         """
         if self.cleaning_market_mechanism == CleaningMarketMechanism.INCOME_ORDER_DESCENDANT:
-            self.consumers.sort(key=lambda c: c.annual_income, reverse=True)
+            self.consumers.sort(key=lambda c: Consumer.annual_income, reverse=True)
         elif self.cleaning_market_mechanism == CleaningMarketMechanism.INCOME_ORDER_ASCENDANT:
-            self.consumers.sort(key=lambda c: c.annual_income)
+            self.consumers.sort(key=lambda c: Consumer.annual_income)
         else:
             shuffle(self.consumers)
 
         for consumer in self.consumers:
-            if not consumer.house:
-                consumer.buy_a_house(self.housing_market)
+            if not Consumer.house:
+                Consumer.buy_a_house(self.housing_market)
 
     def compute_owners_population_rate(self) -> float:
         """
         Compute the owners population rate after the market is clean.
         """
-        owners = sum(1 for c in self.consumers if c.house)
+        owners = sum(1 for c in self.consumers if Consumer.house)
         return owners / self.consumers_number
 
     def compute_houses_availability_rate(self) -> float:
