@@ -1,6 +1,3 @@
-import statistics
-from typing import List, Dict, Any
-
 from dataclasses import dataclass
 from typing import Dict, List, Union, Any, Tuple
 import statistics
@@ -16,7 +13,7 @@ class Descriptor:
         """
         if not self.data:
             raise ValueError("The dataset is empty!")
-        
+
         columns_to_check = self._get_columns_to_check(columns)
         ratios = {}
         total_rows = len(self.data)
@@ -66,10 +63,10 @@ class Descriptor:
                 index = int(len(values) * (percentile / 100))
                 percentiles[col] = values[min(index, len(values) - 1)]
         return percentiles
-
-    def type_and_mode(self, columns: Union[List[str], str] = "all") -> Dict[str, Tuple[str, Union[str, float]]]:
+    
+    def type_and_mode(self, columns: Union[List[str], str] = "all") -> Dict[str, Tuple[str, Any]]:
         """
-        Determine the type and mode of the columns.
+        Compute the type and mode of specified columns, ignoring None values.
         """
         columns_to_check = self._get_columns_to_check(columns)
         types_and_modes = {}
@@ -77,13 +74,55 @@ class Descriptor:
         for col in columns_to_check:
             non_none_values = [row[col] for row in self.data if row.get(col) is not None]
             if non_none_values:
-                # Infer type and calculate mode
                 value_type = type(non_none_values[0]).__name__
                 mode_value = statistics.mode(non_none_values)
                 types_and_modes[col] = (value_type, mode_value)
             else:
                 types_and_modes[col] = ("None", None)
         return types_and_modes
+
+    def _get_columns_to_check(self, columns: Union[List[str], str], numeric_only: bool = False) -> List[str]:
+        """
+        Helper function to determine which columns to process.
+
+        Args:
+            columns (Union[List[str], str]): Specific columns or 'all' to process all columns.
+            numeric_only (bool): If True, only numeric columns will be returned.
+
+        Returns:
+            List[str]: List of column names to process.
+        """
+        sample_row = self.data[0] if self.data else {}
+        all_columns = list(sample_row.keys())
+
+        if columns == "all":
+            columns_to_check = all_columns
+        else:
+            columns_to_check = [col for col in columns if col in all_columns]
+
+        if numeric_only:
+            # Keep only columns where all values are numeric
+            columns_to_check = [
+                col for col in columns_to_check 
+                if all(self._is_numeric(row.get(col)) for row in self.data if row.get(col) is not None)
+            ]
+        return columns_to_check
+
+    def _is_numeric(self, value: Any) -> bool:
+        """
+        Helper function to check if a value is numeric.
+
+        Args:
+            value (Any): The value to check.
+
+        Returns:
+            bool: True if the value can be converted to float, otherwise False.
+        """
+        try:
+            float(value)
+            return True
+        except (ValueError, TypeError):
+            return False
 
 import numpy as np
 from dataclasses import dataclass
