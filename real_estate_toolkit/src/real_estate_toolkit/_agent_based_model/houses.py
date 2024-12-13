@@ -44,15 +44,15 @@ class House:
         - Poor: Very small area or very old build
         """
         if self.is_new_construction() and self.area >= 200:
-            self.quality_score = QualityScore.Excellent
+            self.quality_score = QualityScore.EXCELLENT
         elif self.area >= 200 and self.year_built >= 150:
-            self.quality_score = QualityScore.Good
+            self.quality_score = QualityScore.GOOD
         elif self.area >= 150 and self.year_built >= 100:
-            self.quality_score = QualityScore.Average
+            self.quality_score = QualityScore.AVERAGE
         elif self.area < 150 or self.year_built < 80:
-            self.quality_score = QualityScore.Fair
+            self.quality_score = QualityScore.FAIR
         else:
-            self.quality_score = QualityScore.Poor
+            self.quality_score = QualityScore.POOR
 
     def sell_house(self) -> None:
         """
