@@ -3,7 +3,6 @@ from pathlib import Path
 from typing import Dict, List, Union
 import csv
 
- 
 class DataLoader: 
 
     data_path: Path
