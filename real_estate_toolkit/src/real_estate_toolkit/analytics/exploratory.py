@@ -6,12 +6,6 @@ from pathlib import Path
 
 class MarketAnalyzer:
     def __init__(self, data_path: str):
-        """
-        Initialize the analyzer with data from a CSV file.
-        
-        Args:
-            data_path (str): Path to the Ames Housing dataset
-        """
         self.data_path = data_path
         self.real_estate_data = pl.read_csv(data_path)
         self.real_state_clean_data = None
@@ -46,10 +40,6 @@ class MarketAnalyzer:
         print("Data cleaning completed.")
 
     def generate_price_distribution_analysis(self) -> pl.DataFrame:
-        """
-        Analyze sale price distribution using clean data.
-        
-        """
         
         price_column = 'SalePrice'  
         price_statistics = self.real_state_clean_data.select(
@@ -74,10 +64,6 @@ class MarketAnalyzer:
         return price_statistics
 
     def neighborhood_price_comparison(self) -> pl.DataFrame:
-        """
-        Create a boxplot comparing house prices across different neighborhoods.
-        
-        """
 
         neighborhood_stats = self.real_state_clean_data.group_by("Neighborhood").agg(
             [
@@ -107,10 +93,6 @@ class MarketAnalyzer:
         return neighborhood_stats
 
     def feature_correlation_heatmap(self, variables: List[str]) -> None:
-        """
-        Generate a correlation heatmap for variables input.
-        
-        """
 
         data = self.real_state_clean_data.select(variables).to_pandas()
 
@@ -130,24 +112,10 @@ class MarketAnalyzer:
 
     @staticmethod
     def save_figure_to_html(fig: go.Figure, output_path: Path) -> Path:
-        """
-        Save a Plotly figure to an HTML file and return the file path.
-
-        Args:
-            fig (go.Figure): The Plotly figure to save.
-            output_path (Path): Path to save the HTML file.
-
-        Returns:
-            Path: The path of the saved HTML file.
-        """
-        fig.write_html(output_path)  # Save the figure to the specified file path
+        fig.write_html(output_path) 
         return output_path
 
     def create_scatter_plots(self) -> Dict[str, go.Figure]:
-        """
-        Create scatter plots exploring relationships between key features.
-       
-        """
 
         scatter_plots = {}
 
