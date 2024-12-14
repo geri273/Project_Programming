@@ -20,38 +20,30 @@ class MarketAnalyzer:
        
         print("Cleaning data...")
 
-        # Step 1: Handle missing values
-        # Identify numeric and categorical columns
         numeric_columns = self.real_estate_data.select(pl.col(pl.Float64) | pl.col(pl.Int64)).columns
         categorical_columns = [col for col in self.real_estate_data.columns if col not in numeric_columns]
 
-        # Fill numeric columns with the median
         for col in numeric_columns:
             median_value = self.real_estate_data[col].median()
             self.real_estate_data = self.real_estate_data.with_columns(
                 self.real_estate_data[col].fill_null(median_value)
             )
 
-        # Fill categorical columns with "Unknown"
         for col in categorical_columns:
             self.real_estate_data = self.real_estate_data.with_columns(
                 self.real_estate_data[col].fill_null("Unknown")
             )
 
-        # Step 2: Convert data types
-        # Ensure numeric columns are of proper numeric type
         for col in numeric_columns:
             self.real_estate_data = self.real_estate_data.with_columns(
                 self.real_estate_data[col].cast(pl.Float64)
             )
 
-        # Ensure categorical columns are string type
         for col in categorical_columns:
             self.real_estate_data = self.real_estate_data.with_columns(
                 self.real_estate_data[col].cast(pl.Utf8)
             )
 
-        # Assign cleaned data to self.cleaned_data
         self.cleaned_data = self.real_estate_data
         print("Data cleaning completed.")
 
