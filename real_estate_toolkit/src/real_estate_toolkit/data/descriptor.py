@@ -65,6 +65,30 @@ class Descriptor:
                 types_and_modes[col] = ("None", None)
         return types_and_modes
 
+    
+    def _get_columns_to_check(self, columns: Union[List[str], str], numeric_only: bool = False) -> List[str]:
+        sample_row = self.data[0] if self.data else {}
+        all_columns = list(sample_row.keys())
+
+        if columns == "all":
+            columns_to_check = all_columns
+        else:
+            columns_to_check = [col for col in columns if col in all_columns]
+
+        if numeric_only:
+            # Keep only columns where all values are numeric
+            columns_to_check = [
+                col for col in columns_to_check 
+                if all(self._is_numeric(row.get(col)) for row in self.data if row.get(col) is not None)
+            ]
+        return columns_to_check
+
+    def _is_numeric(self, value: Any) -> bool:
+        try:
+            float(value)
+            return True
+        except (ValueError, TypeError):
+            return False
 
 import numpy as np
 from dataclasses import dataclass
@@ -74,6 +98,26 @@ from typing import Dict, List, Union, Any, Tuple
 class DescriptorNumpy:
     import numpy as np
     from typing import List, Dict, Any
+
+    
+    def __init__(self, data: List[Dict[str, Any]]):
+        """
+        Initialize DescriptorNumpy with data.
+
+        Args:
+            data (List[Dict[str, Any]]): A list of dictionaries containing the dataset.
+        """
+        if not data:
+            raise ValueError("The dataset cannot be empty.")
+
+        self.data = data  # Original data as list of dictionaries
+        self.columns = list(data[0].keys())  # Extract column names
+        self.array = np.array([
+            [row.get(col, None) for col in self.columns] for row in data
+        ], dtype=object)  # Convert to a NumPy array for numerical operations
+    
+    def __getitem__(self, index):
+        return self.data[index]
 
     def none_ratio(data: List[Dict[str, Any]]) -> Dict[str, float]:
         if not data:
