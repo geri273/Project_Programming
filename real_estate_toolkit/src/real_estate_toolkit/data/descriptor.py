@@ -160,6 +160,3 @@ class DescriptorNumpy:
         if not values:
             return None
         return np.argmax(np.bincount(values))
-
-
-
