@@ -57,7 +57,7 @@ class HousePricePredictor:
             ]
         )
 
-    def train_models(self) -> Dict[str, Dict[str, Any]]:
+    def train_baseline_models(self) -> Dict[str, Dict[str, Any]]:
         """
         Train Linear Regression and Random Forest models.
         """
