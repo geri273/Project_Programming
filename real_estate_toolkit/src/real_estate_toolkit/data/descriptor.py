@@ -101,12 +101,6 @@ class DescriptorNumpy:
 
     
     def __init__(self, data: List[Dict[str, Any]]):
-        """
-        Initialize DescriptorNumpy with data.
-
-        Args:
-            data (List[Dict[str, Any]]): A list of dictionaries containing the dataset.
-        """
         if not data:
             raise ValueError("The dataset cannot be empty.")
 
