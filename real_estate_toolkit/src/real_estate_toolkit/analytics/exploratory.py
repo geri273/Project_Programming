@@ -79,7 +79,7 @@ class MarketAnalyzer:
         
         """
 
-        neighborhood_stats = self.cleaned_data.groupby("Neighborhood").agg(
+        neighborhood_stats = self.cleaned_data.group_by("Neighborhood").agg(
             [
                 pl.col("SalePrice").mean().alias("mean_price"),
                 pl.col("SalePrice").median().alias("median_price"),
@@ -106,7 +106,6 @@ class MarketAnalyzer:
 
         return neighborhood_stats
 
-
     def feature_correlation_heatmap(self, variables: List[str]) -> None:
         """
         Generate a correlation heatmap for variables input.
@@ -129,6 +128,20 @@ class MarketAnalyzer:
 
         print("Correlation heatmap saved.")
 
+    @staticmethod
+    def save_figure_to_html(fig: go.Figure, output_path: Path) -> Path:
+        """
+        Save a Plotly figure to an HTML file and return the file path.
+
+        Args:
+            fig (go.Figure): The Plotly figure to save.
+            output_path (Path): Path to save the HTML file.
+
+        Returns:
+            Path: The path of the saved HTML file.
+        """
+        fig.write_html(output_path)  # Save the figure to the specified file path
+        return output_path
 
     def create_scatter_plots(self) -> Dict[str, go.Figure]:
         """
@@ -179,7 +192,7 @@ class MarketAnalyzer:
         output_folder.mkdir(parents=True, exist_ok=True)
 
         for plot_name, fig in scatter_plots.items():
-            fig.write_html(output_folder / f"{plot_name}.html")
-            print(f"{plot_name} saved.")
+            output_file = self.save_figure_to_html(fig, output_folder / f"{plot_name}.html")
+            print(f"HTML file saved at: {output_file}")
 
         return scatter_plots
