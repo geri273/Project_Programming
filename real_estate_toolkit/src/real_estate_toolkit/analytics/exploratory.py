@@ -14,7 +14,7 @@ class MarketAnalyzer:
         """
         self.data_path = data_path
         self.real_estate_data = pl.read_csv(data_path)
-        self.cleaned_data = None
+        self.real_state_clean_data = None
 
     def clean_data(self) -> None:
 
