@@ -7,6 +7,15 @@ class DataLoader:
 
     data_path: Path
 
+    def __init__(self, data_path: str):
+        """
+        Initialize the DataLoader with the path to the dataset.
+        
+        Args:
+            data_path (str): Path to the dataset CSV file.
+        """
+        self.data_path = data_path
+        self.data = None
     def load_data_from_csv(self) -> List[Dict[str, float]]:
 
         data = []
