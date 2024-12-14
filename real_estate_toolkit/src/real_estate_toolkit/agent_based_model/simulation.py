@@ -36,17 +36,11 @@ class Simulation:
     interest_rate: float = 0.05
     
     def create_housing_market(self):
-        """
-        Initialize market with houses.
-        """
         self.housing_market = HousingMarket(
             [House(**data) for data in self.housing_market_data]
         )
 
     def create_consumers(self) -> None:
-        """
-        Generate consumer population.
-        """
         self.consumers = []
         for _ in range(self.consumers_number):
             income = gauss(self.annual_income.average, self.annual_income.standard_deviation)
@@ -67,17 +61,11 @@ class Simulation:
             self.consumers.append(consumer)
 
     def compute_consumers_savings(self) -> None:
-        """
-        Calculate savings for all consumers.
-        """
         for consumer in self.consumers:
             Consumer.compute_savings(self.years)
 
 
     def clean_the_market(self) -> None:
-        """
-        Execute market transactions.
-        """
         if self.cleaning_market_mechanism == CleaningMarketMechanism.INCOME_ORDER_DESCENDANT:
             self.consumers.sort(key=lambda c: Consumer.annual_income, reverse=True)
         elif self.cleaning_market_mechanism == CleaningMarketMechanism.INCOME_ORDER_ASCENDANT:
@@ -90,15 +78,9 @@ class Simulation:
                 Consumer.buy_a_house(self.housing_market)
 
     def compute_owners_population_rate(self) -> float:
-        """
-        Compute the owners population rate after the market is clean.
-        """
         owners = sum(1 for c in self.consumers if Consumer.house)
         return owners / self.consumers_number
 
     def compute_houses_availability_rate(self) -> float:
-        """
-        Compute the houses availability rate after the market is clean.
-        """
         available_houses = sum(1 for house in self.housing_market.houses if house.available)
         return available_houses / len(self.housing_market.houses)
