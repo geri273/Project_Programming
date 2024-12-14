@@ -74,7 +74,6 @@ class HousePricePredictor:
         
         results = {}
         for name, model in models.items():
-            # Build pipeline
             pipeline = Pipeline(steps=[
                 ('preprocessor', self.preprocessor),
                 ('model', model)
