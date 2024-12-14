@@ -21,17 +21,11 @@ class Consumer:
     house: Optional[House] = None
 
     def compute_savings(self, years: int) -> None:
-        """
-        Calculate accumulated savings over time using compound interest.
-        """
         for _ in range(years):
             self.savings += self.annual_income * self.saving_rate
             self.savings *= (1 + self.interest_rate)
 
     def buy_a_house(self, housing_market: HousingMarket) -> None:
-        """
-        Attempt to purchase a suitable house based on preferences.
-        """
         if self.house:
             return  
 
