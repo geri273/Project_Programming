@@ -134,7 +134,7 @@ class DescriptorNumpy:
             return None
         return np.percentile(values, p)
 
-    def type_mode(data: List[Dict[str, Any]], column: str) -> Any:
+    def type_and_mode(data: List[Dict[str, Any]], column: str) -> Any:
         values = [row[column] for row in data if row[column] is not None]
         if not values:
             return None
