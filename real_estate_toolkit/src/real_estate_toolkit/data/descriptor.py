@@ -65,29 +65,6 @@ class Descriptor:
                 types_and_modes[col] = ("None", None)
         return types_and_modes
 
-    def _get_columns_to_check(self, columns: Union[List[str], str], numeric_only: bool = False) -> List[str]:
-        sample_row = self.data[0] if self.data else {}
-        all_columns = list(sample_row.keys())
-
-        if columns == "all":
-            columns_to_check = all_columns
-        else:
-            columns_to_check = [col for col in columns if col in all_columns]
-
-        if numeric_only:
-            # Keep only columns where all values are numeric
-            columns_to_check = [
-                col for col in columns_to_check 
-                if all(self._is_numeric(row.get(col)) for row in self.data if row.get(col) is not None)
-            ]
-        return columns_to_check
-
-    def _is_numeric(self, value: Any) -> bool:
-        try:
-            float(value)
-            return True
-        except (ValueError, TypeError):
-            return False
 
 import numpy as np
 from dataclasses import dataclass
