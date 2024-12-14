@@ -1,27 +1,29 @@
 import re
 from typing import List, Dict, Any
 
-def rename_with_best_practices(data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    if not data:
-        return data
+class Cleaner: 
+
+    def rename_with_best_practices(data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        if not data:
+            return data
         
-    columns = data[0].keys()
-    renamed_columns = {}
+        columns = data[0].keys()
+        renamed_columns = {}
 
-    for col in columns:
-        new_col_name = re.sub(r'[^a-zA-Z0-9]', '_', col).lower()
-        renamed_columns[col] = new_col_name
+        for col in columns:
+            new_col_name = re.sub(r'[^a-zA-Z0-9]', '_', col).lower()
+            renamed_columns[col] = new_col_name
 
-    for row in data:
-        for old_col, new_col in renamed_columns.items():
-            if old_col in row:
-                row[new_col] = row.pop(old_col)
+        for row in data:
+            for old_col, new_col in renamed_columns.items():
+                if old_col in row:
+                    row[new_col] = row.pop(old_col)
 
-    return data
+        return data
 
-def na_to_none(data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    for row in data:
-        for key, value in row.items():
-            if value == 'NA':
-                row[key] = None
-    return data
+    def na_to_none(data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        for row in data:
+            for key, value in row.items():
+                if value == 'NA':
+                    row[key] = None
+        return data
