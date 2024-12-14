@@ -42,7 +42,7 @@ class MarketAnalyzer:
                 self.real_estate_data[col].cast(pl.Utf8)
             )
 
-        self.cleaned_data = self.real_estate_data
+        self.real_state_clean_data = self.real_estate_data
         print("Data cleaning completed.")
 
     def generate_price_distribution_analysis(self) -> pl.DataFrame:
@@ -52,7 +52,7 @@ class MarketAnalyzer:
         """
         
         price_column = 'SalePrice'  
-        price_statistics = self.cleaned_data.select(
+        price_statistics = self.real_state_clean_data.select(
             pl.col(price_column).mean().alias("mean"),
             pl.col(price_column).median().alias("median"),
             pl.col(price_column).std().alias("std_dev"),
@@ -61,7 +61,7 @@ class MarketAnalyzer:
         )
         
        
-        fig = px.histogram(self.cleaned_data.to_pandas(), x=price_column, nbins=50, title="Sale Price Distribution")
+        fig = px.histogram(self.real_state_clean_data.to_pandas(), x=price_column, nbins=50, title="Sale Price Distribution")
         fig.update_layout(xaxis_title='Sale Price', yaxis_title='Count')
         
      
@@ -79,7 +79,7 @@ class MarketAnalyzer:
         
         """
 
-        neighborhood_stats = self.cleaned_data.group_by("Neighborhood").agg(
+        neighborhood_stats = self.real_state_clean_data.group_by("Neighborhood").agg(
             [
                 pl.col("SalePrice").mean().alias("mean_price"),
                 pl.col("SalePrice").median().alias("median_price"),
@@ -90,7 +90,7 @@ class MarketAnalyzer:
         )
 
         fig = px.box(
-            self.cleaned_data.to_pandas(),
+            self.real_state_clean_data.to_pandas(),
             x="Neighborhood",
             y="SalePrice",
             title="Price Comparison Across Neighborhoods",
@@ -112,7 +112,7 @@ class MarketAnalyzer:
         
         """
 
-        data = self.cleaned_data.select(variables).to_pandas()
+        data = self.real_state_clean_data.select(variables).to_pandas()
 
         correlation_matrix = data.corr()
 
@@ -152,7 +152,7 @@ class MarketAnalyzer:
         scatter_plots = {}
 
         fig1 = px.scatter(
-            self.cleaned_data.to_pandas(),
+            self.real_state_clean_data.to_pandas(),
             x="GrLivArea", 
             y="SalePrice",
             title="House Price vs. Total Square Footage",
@@ -164,7 +164,7 @@ class MarketAnalyzer:
         scatter_plots["House_Price_vs_Square_Feet"] = fig1
 
         fig2 = px.scatter(
-            self.cleaned_data.to_pandas(),
+            self.real_state_clean_data.to_pandas(),
             x="YearBuilt", 
             y="SalePrice",
             title="Sale Price vs. Year Built",
@@ -177,7 +177,7 @@ class MarketAnalyzer:
 
 
         fig3 = px.scatter(
-            self.cleaned_data.to_pandas(),
+            self.real_state_clean_data.to_pandas(),
             x="OverallQual", 
             y="SalePrice",
             title="Overall Quality vs. Sale Price",
