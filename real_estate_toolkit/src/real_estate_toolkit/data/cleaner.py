@@ -4,12 +4,6 @@ from typing import List, Dict, Any
 class Cleaner: 
 
     def __init__(self, data: list):
-        """
-        Initialize the Cleaner with data.
-
-        Args:
-            data (list): The dataset to clean, represented as a list of dictionaries.
-        """
         self.data = data
     
     def __getitem__(self, index):
@@ -41,12 +35,7 @@ class Cleaner:
         return data
 
     def getitem(self, index):
-        """
-        Allow Cleaner object to be accessed like a list.
-        """
         return self.data[index]
+        
     def __len__(self):
-        """
-        Return the length of the cleaned dataset.
-        """
         return len(self.data)
